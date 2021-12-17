@@ -1,0 +1,2 @@
+<use name="CombineHarvester/CombineTools"/>
+<bin file="bbtautau.cc" name="bbtautauModel"/>
