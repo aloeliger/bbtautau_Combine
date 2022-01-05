@@ -6,23 +6,12 @@ import os
 import re
 import logging
 
+from bbtautau_Combine.common.datacardAccessManager import datacardAccessManager
+
 def main(args):
-    #okay. First things first. Let's go and find the cards that we need to use
-    homePath = os.getcwd()
-
-    #construct the spot the datacards are supposed to be:
-    outputPath = os.environ['CMSSW_BASE']+'/src/bbtautau_Combine/output/Output_'+args.dateTag
-    if not os.path.isdir(outputPath):
-        print("Couldn't find the output path. Check the date tag.")
-        exit(-1)
-        
-    os.chdir(outputPath)
-    
-    #get the cards
-    cardNames = filter(lambda x: re.match("FinalCard.+[0-9]\.root", x), os.listdir("./"))
-
-    #print("Card names:")
-    #print(cardNames)
+    #hand off the datacard accessing to the module and get the cards
+    theDatacardAccessManager = datacardAccessManager(args.dateTag)
+    cardNames = theDatacardAccessManager.getCardNames()
 
     #setup a log to let us know what it is we did here.
 
@@ -31,6 +20,7 @@ def main(args):
                         level=logging.INFO,
                         format='%(asctime)s %(message)s')
     significanceOutputFileName = 'significanceAnalysisOutput.txt'
+    open(significanceOutputFileName, 'w').close()
     
     #Okay. Now, we run the combine tool over these and get blinded significances
     for cardName in cardNames:
@@ -51,7 +41,7 @@ def main(args):
         os.system(significanceCommand+' | tee -a '+significanceOutputFileName)
 
     print("Finished!")
-    os.chdir(homePath)
+    theDatacardAccessManager.returnToHomePath()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = "script for running the (blinded) signficances of the bbtautau cards")
